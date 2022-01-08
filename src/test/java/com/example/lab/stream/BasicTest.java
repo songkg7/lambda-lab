@@ -1,7 +1,13 @@
 package com.example.lab.stream;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,8 +20,19 @@ public class BasicTest {
         // NOTE: resources/User.csv 을 읽어서 처리할 것!
         @Test
         @DisplayName("각 취미를 선호하는 인원이 몇 명인지 계산하라")
-        void quiz_1() {
+        void quiz_1() throws IOException, CsvException {
+            //noinspection ConstantConditions
+            CSVReader csvReader = new CSVReader(new FileReader(getClass().getResource("/User.csv").getFile()));
+            csvReader.readNext();
+            List<String[]> strings = csvReader.readAll();
 
+            Map<String, Integer> result = new HashMap<>();
+            strings.stream()
+                    .map(line -> line[1].replaceAll("\\s", ""))
+                    .flatMap(hobbies -> Arrays.stream(hobbies.split(":")))
+                    .forEach(hobby -> result.merge(hobby, 1, Integer::sum));
+
+            result.keySet().forEach(v -> System.out.println(v + " : " + result.get(v)));
         }
 
         @Test
